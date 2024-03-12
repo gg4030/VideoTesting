@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video KYC</title>
+<link rel="stylesheet" href="test.css">
+<style>
+    #videoElement {
+        width: 100%;
+        height: auto;
+    }
+</style>
+</head>
+<body>
+    <button id="toggleCameraButton">Turn Camera On</button><br><br>
+    <video id="videoElement"></video>
+    
+    <form id="userDetailsForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+        
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" name="dob" required><br><br>
+        
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" required><br><br>
+        
+        <!-- Add more fields for PAN card, Aadhaar, signature, income range, type of employment -->
+        
+        <button type="button" id="captureButton">Capture Snapshot</button><br><br>
+        
+        <input type="submit" value="Submit">
+    </form>
+    
+    <canvas id="canvas" style="display: none;"></canvas>
+    
+    <script>
+        var isCameraOn = false;
+        var videoStream;
+        
+        // Function to toggle the camera on and off
+        document.getElementById('toggleCameraButton').addEventListener('click', function() {
+            var button = document.getElementById('toggleCameraButton');
+            var video = document.getElementById('videoElement');
+            
+            if (isCameraOn) {
+                // Turn off the camera
+                video.pause();
+                video.srcObject = null;
+                isCameraOn = false;
+                button.textContent = 'Turn Camera On';
+            } else {
+                // Turn on the camera
+                navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    videoStream = stream;
+                    video.srcObject = stream;
+                    video.play();
+                    isCameraOn = true;
+                    button.textContent = 'Turn Camera Off';
+                })
+                .catch(function(err) {
+                    console.log("Error: " + err);
+                });
+            }
+        });
+        
+        // Function to capture snapshot from the video stream
+        document.getElementById('captureButton').addEventListener('click', function() {
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            var video = document.getElementById('videoElement');
+            
+            // Set the canvas dimensions to match the video feed
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Draw the current frame of the video onto the canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert the canvas content to a data URL representing the image
+            var imageDataURL = canvas.toDataURL('image/jpeg');
+            
+            // Display the captured snapshot (optional)
+            var capturedImage = new Image();
+            capturedImage.src = imageDataURL;
+            document.body.appendChild(capturedImage);
+            
+            // Include code to save the captured snapshot and user details
+            // For the purpose of this example, we'll just log them to console
+            console.log("Snapshot Captured:", imageDataURL);
+            console.log("User Details:", document.getElementById('userDetailsForm').elements);
+        });
+    </script>
+</body>
+</html>
